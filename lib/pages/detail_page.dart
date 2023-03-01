@@ -210,6 +210,34 @@ class DetailPage extends StatelessWidget {
                       ],
                     ),
                   ),
+                  SizedBox(
+                    height: 24,
+                  ),
+                  Text(
+                    "Images",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 16,
+                  ),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: ScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                    ),
+                    itemCount: 7,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Image.network(
+                        "https://images.pexels.com/photos/1078981/pexels-photo-1078981.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
