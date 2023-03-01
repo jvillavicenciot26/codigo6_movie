@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'package:codigo6_movieapp/models/movie_model.dart';
+import 'package:codigo6_movieapp/pages/detail_page.dart';
+import 'package:codigo6_movieapp/ui/general/colors.dart';
+import 'package:codigo6_movieapp/widgets/item_home_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -32,67 +35,50 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff111111),
-      body: Padding(
-        padding: const EdgeInsets.all(14.0),
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12.0,
-            crossAxisSpacing: 12.0,
-            childAspectRatio: 0.7,
-          ),
-          itemCount: moviesModel.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
-                color: Colors.red,
-                image: DecorationImage(
-                    image: NetworkImage(
-                      "https://image.tmdb.org/t/p/w500${moviesModel[index].posterPath}",
-                    ),
-                    fit: BoxFit.cover),
+      backgroundColor: kBrandPrimaryColor,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                "TotalCinema",
+                style: TextStyle(
+                  fontSize: 28.0,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          Color(0xff111111).withOpacity(0.99),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          moviesModel[index].originalTitle,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16.0,
-                          ),
+            ),
+            Expanded(
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: BouncingScrollPhysics(),
+                padding: const EdgeInsets.all(14.0),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12.0,
+                  crossAxisSpacing: 12.0,
+                  childAspectRatio: 0.7,
+                ),
+                itemCount: moviesModel.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return ItemHomeWidget(
+                    model: moviesModel[index],
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailPage(),
                         ),
-                        Text(
-                          "${moviesModel[index].releaseDate.year}",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                      );
+                    },
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
