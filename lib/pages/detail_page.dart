@@ -1,9 +1,15 @@
+import 'package:codigo6_movieapp/models/backdrops_model.dart';
+import 'package:codigo6_movieapp/models/character_model.dart';
 import 'package:codigo6_movieapp/models/movie_detail_model.dart';
+import 'package:codigo6_movieapp/models/review_model.dart';
 import 'package:codigo6_movieapp/services/api_service.dart';
 import 'package:codigo6_movieapp/ui/general/colors.dart';
+import 'package:codigo6_movieapp/utils/constants.dart';
 import 'package:codigo6_movieapp/widgets/item_cast_widget.dart';
+import 'package:codigo6_movieapp/widgets/item_review_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 class DetailPage extends StatefulWidget {
   int idMovie;
@@ -15,6 +21,9 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   MovieDetailMode? movie;
+  List<CharacterModel> characteres = [];
+  List<BackDropsModel> backdrops = [];
+  List<ReviewModel> reviews = [];
 
   @override
   void initState() {
@@ -25,7 +34,10 @@ class _DetailPageState extends State<DetailPage> {
   getData() async {
     ApiService apiService = ApiService();
     movie = await apiService.getMovieDetails(widget.idMovie);
-    print(movie);
+    characteres = await apiService.getCharacters(widget.idMovie);
+    backdrops = await apiService.getBackDrops(widget.idMovie);
+    reviews = await apiService.getReviews(widget.idMovie);
+    //print(reviews);
     setState(() {});
   }
 
@@ -128,7 +140,10 @@ class _DetailPageState extends State<DetailPage> {
                                   ),
                                 ),
                                 IconButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Share.share(
+                                        "Película: ${movie!.originalTitle} | Resumen: ${movie!.overview}");
+                                  },
                                   icon: Icon(
                                     Icons.share_outlined,
                                     color: Colors.white,
@@ -273,14 +288,17 @@ class _DetailPageState extends State<DetailPage> {
                           scrollDirection: Axis.horizontal,
                           physics: BouncingScrollPhysics(),
                           child: Row(
-                            children: [
-                              ItemCastWidget(),
-                              ItemCastWidget(),
-                              ItemCastWidget(),
-                              ItemCastWidget(),
-                              ItemCastWidget(),
-                              ItemCastWidget(),
-                            ],
+                            children: characteres
+                                .map((e) => ItemCastWidget(
+                                      model: e,
+                                    ))
+                                .toList(),
+                            // ItemCastWidget(),
+                            // ItemCastWidget(),
+                            // ItemCastWidget(),
+                            // ItemCastWidget(),
+                            // ItemCastWidget(),
+                            // ItemCastWidget(),
                           ),
                         ),
                         SizedBox(
@@ -310,10 +328,11 @@ class _DetailPageState extends State<DetailPage> {
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
                               ),
-                              itemCount: 7,
+                              itemCount: backdrops.length,
                               itemBuilder: (BuildContext context, int index) {
                                 return Image.network(
-                                  "https://images.pexels.com/photos/1078981/pexels-photo-1078981.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                                  //"https://images.pexels.com/photos/1078981/pexels-photo-1078981.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                                  api_image_url + backdrops[index].filePath,
                                   fit: BoxFit.cover,
                                 );
                               },
@@ -334,62 +353,14 @@ class _DetailPageState extends State<DetailPage> {
                         SizedBox(
                           height: 16,
                         ),
-                        ExpansionTile(
-                          tilePadding: EdgeInsets.symmetric(
-                            horizontal: 10.0,
-                            vertical: 6.0,
-                          ),
-                          title: Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: Colors.white10,
-                                child: Text(
-                                  "7.2",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                        Column(
+                          children: reviews
+                              .map(
+                                (e) => ItemReviewWidget(
+                                  review: e,
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 8.0,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Juan Manuel Gonzales",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  Text(
-                                    "2022-11-14",
-                                    style: TextStyle(
-                                      color: Colors.white60,
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          iconColor: kBrandSecondaryColor,
-                          collapsedIconColor: Colors.white,
-                          childrenPadding: EdgeInsets.symmetric(
-                            horizontal: 22.0,
-                            vertical: 6.0,
-                          ),
-                          children: [
-                            Text(
-                              "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14.0,
-                              ),
-                            ),
-                          ],
+                              )
+                              .toList(),
                         ),
                         SizedBox(
                           height: 60,

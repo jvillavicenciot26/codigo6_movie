@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:codigo6_movieapp/models/genres_model.dart';
 import 'package:codigo6_movieapp/models/movie_model.dart';
 import 'package:codigo6_movieapp/pages/detail_page.dart';
 import 'package:codigo6_movieapp/services/api_service.dart';
@@ -14,6 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<MovieModel> moviesModel = [];
+  List<GenreModel> genresModel = [];
 
   getDataInternet() async {
     // Uri url = Uri.parse(
@@ -25,6 +27,7 @@ class _HomePageState extends State<HomePage> {
     // moviesModel = movies.map((e) => MovieModel.fromJson(e)).toList();
     ApiService apiService = ApiService();
     moviesModel = await apiService.getMovies();
+    genresModel = await apiService.getGenders();
     setState(() {});
   }
 
@@ -52,6 +55,35 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
+              ),
+            ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Wrap(
+                spacing: 6.0,
+                runSpacing: -4,
+                children: genresModel
+                    .map(
+                      (e) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            e.name,
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Container(
+                            color: Colors.indigo,
+                            width: 50,
+                            height: 2,
+                          ),
+                        ],
+                      ),
+                    )
+                    .toList(),
               ),
             ),
             Expanded(
