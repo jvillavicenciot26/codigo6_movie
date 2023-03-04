@@ -4,6 +4,7 @@ import 'package:codigo6_movieapp/models/movie_model.dart';
 import 'package:codigo6_movieapp/pages/detail_page.dart';
 import 'package:codigo6_movieapp/services/api_service.dart';
 import 'package:codigo6_movieapp/ui/general/colors.dart';
+import 'package:codigo6_movieapp/widgets/item_filter_widget.dart';
 import 'package:codigo6_movieapp/widgets/item_home_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -15,7 +16,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<MovieModel> moviesModel = [];
+  List<MovieModel> moviesModelTemp = [];
   List<GenreModel> genresModel = [];
+  int idFilter = 0;
+  int counterPage = 1;
+  int value = 1;
+
+  ScrollController movieScroller = ScrollController();
 
   getDataInternet() async {
     // Uri url = Uri.parse(
@@ -26,9 +33,43 @@ class _HomePageState extends State<HomePage> {
     // List movies = data["results"];
     // moviesModel = movies.map((e) => MovieModel.fromJson(e)).toList();
     ApiService apiService = ApiService();
-    moviesModel = await apiService.getMovies();
+    // moviesModel = await apiService.getMovies();
+    // moviesModelTemp = moviesModel;
+    await getMovies();
     genresModel = await apiService.getGenders();
+    genresModel.insert(0, GenreModel(id: 0, name: "All"));
     setState(() {});
+  }
+
+  filterMovie(int id) {
+    moviesModel = moviesModelTemp;
+    if (id != 0) {
+      moviesModel = moviesModel
+          .where(
+            (element) => element.genreIds.contains(id),
+          )
+          .toList();
+    }
+    setState(() {});
+  }
+
+  getMovies() async {
+    ApiService apiService = ApiService();
+    moviesModel = [
+      ...moviesModelTemp,
+      ...await apiService.getMovies(counterPage)
+    ];
+    moviesModelTemp = moviesModel;
+    filterMovie(idFilter);
+    setState(() {});
+    counterPage++;
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    movieScroller.dispose();
   }
 
   @override
@@ -36,6 +77,12 @@ class _HomePageState extends State<HomePage> {
     // TODO: implement initState
     super.initState();
     getDataInternet();
+    movieScroller.addListener(() {
+      if (movieScroller.offset >= movieScroller.position.maxScrollExtent) {
+        getMovies();
+      }
+      ;
+    });
   }
 
   @override
@@ -48,48 +95,75 @@ class _HomePageState extends State<HomePage> {
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
-                "TotalCinema",
-                style: TextStyle(
-                  fontSize: 28.0,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Wrap(
-                spacing: 6.0,
-                runSpacing: -4,
-                children: genresModel
-                    .map(
-                      (e) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            e.name,
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
+              child: Column(
+                children: [
+                  Text(
+                    "TotalCinema",
+                    style: TextStyle(
+                      fontSize: 28.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: BouncingScrollPhysics(),
+                    child: Row(
+                      children: genresModel
+                          .map(
+                            (e) => ItemFilterWidget(
+                              onTap: () {
+                                idFilter = e.id;
+                                filterMovie(idFilter);
+                              },
+                              genreModel: e,
+                              isSelected: e.id == idFilter,
                             ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 12,
+                  ),
+                  Container(
+                    color: Colors.white,
+                    child: DropdownButton(
+                      value: value,
+                      items: [
+                        DropdownMenuItem(
+                          child: Text(
+                            "Hola",
                           ),
-                          Container(
-                            color: Colors.indigo,
-                            width: 50,
-                            height: 2,
+                          value: 1,
+                        ),
+                        DropdownMenuItem(
+                          child: Text(
+                            "Hola 2",
                           ),
-                        ],
-                      ),
-                    )
-                    .toList(),
+                          value: 2,
+                        ),
+                        DropdownMenuItem(
+                          child: Text(
+                            "Hola 3",
+                          ),
+                          value: 3,
+                        ),
+                      ],
+                      onChanged: (int? newval) {
+                        value = newval!;
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
               child: GridView.builder(
+                controller: movieScroller,
                 shrinkWrap: true,
-                physics: BouncingScrollPhysics(),
+                //physics: BouncingScrollPhysics(),
                 padding: const EdgeInsets.all(14.0),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,

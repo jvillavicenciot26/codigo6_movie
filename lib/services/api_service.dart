@@ -9,9 +9,9 @@ import 'package:codigo6_movieapp/utils/constants.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  Future<List<MovieModel>> getMovies() async {
+  Future<List<MovieModel>> getMovies(int counterPage) async {
     Uri url = Uri.parse(
-        "$api_url/discover/movie?api_key=$api_key&language=en-US&page=1");
+        "$api_url/discover/movie?api_key=$api_key&language=en-US&page=$counterPage");
     http.Response response = await http.get(url);
 
     Map data = json.decode(response.body);
